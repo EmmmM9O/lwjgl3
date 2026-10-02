@@ -12,7 +12,6 @@
 *.mhr
 *.obj
 *.ogg
-*.sh
 *.so
 *.ttf
 *.wav
