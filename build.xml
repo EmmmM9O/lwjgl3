@@ -1382,6 +1382,7 @@
             </quiet>
 
             <!-- Bundle natives -->
+            <!--
             <release-natives name="@{name}" title="@{title}" native-library="@{native-library}" unless:set="java-only.binding.@{name}">
                 <content><natives/></content>
                 <freebsd-content><freebsd/></freebsd-content>
@@ -1395,7 +1396,7 @@
                 <windows-content><windows/></windows-content>
                 <windows-x86-content><windows-x86/></windows-x86-content>
                 <windows-arm64-content><windows-arm64/></windows-arm64-content>
-            </release-natives>
+            </release-natives>-->
 
             <!-- Bundle classes -->
             <lwjgl-jar destfile="${release}/${module}/${module}.jar" title="@{title}">
@@ -1504,7 +1505,7 @@
     </target>
 
     <!-- Set the LWJGL_BUILD_OFFLINE=true environment variable for local builds. -->
-    <target name="release" depends="-check-release-jdk,compile,-compile-generator,-build-version">
+    <target name="release" depends="compile,-compile-generator,-build-version">
         <!--
         CUSTOM BUILD (LOCAL):
             * build.version="M.m.r SNAPSHOT"
@@ -1622,7 +1623,10 @@
 
         <parallel threadcount="4" failonany="true">
 
+	<release-module name="opengles" native-library="lwjgl_opengles" title="OpenGL ES" if:true="${binding.opengles}"/>
+
         <!-- Assimp -->
+        <!--
         <release-module name="assimp" title="assimp" if:true="${binding.assimp}">
             <natives>
                 <get-release platform="freebsd" arch="x64" file="libassimp.so"/>
@@ -1671,19 +1675,14 @@
             </natives>
         </release-module>
 
-        <!-- bgfx -->
         <release-module name="bgfx" native-library="bgfx" title="bgfx" if:true="${binding.bgfx}"/>
 
-        <!-- EGL -->
         <release-module name="egl" title="EGL" if:true="${binding.egl}"/>
 
-        <!-- FMOD -->
         <release-module name="fmod" title="FMOD" if:true="${binding.fmod}"/>
 
-        <!-- FreeType -->
         <release-module name="freetype" native-library="freetype" title="FreeType" if:true="${binding.freetype}"/>
 
-        <!-- GLFW -->
         <release-module name="glfw" title="GLFW" if:true="${binding.glfw}">
             <natives>
                 <get-release platform="freebsd" arch="x64" file="libglfw.so"/>
@@ -1725,7 +1724,6 @@
             </natives>
         </release-module>
 
-        <!-- HarfBuzz -->
         <release-module name="harfbuzz" native-library="harfbuzz" title="HarfBuzz" if:true="${binding.harfbuzz}">
             <natives>
                 <get-release platform="freebsd" arch="x64" file="libharfbuzz.so"/>
@@ -1796,16 +1794,12 @@
             </natives>
         </release-module>
 
-        <!-- hwloc -->
         <release-module name="hwloc" native-library="hwloc" title="hwloc" if:true="${binding.hwloc}"/>
 
-        <!-- JAWT -->
         <release-module name="jawt" title="JAWT" if:true="${binding.jawt}"/>
 
-        <!-- jemalloc -->
         <release-module name="jemalloc" native-library="jemalloc" title="jemalloc" if:true="${binding.jemalloc}"/>
 
-        <!-- KTX -->
         <release-module name="ktx" title="KTX" if:true="${binding.ktx}">
             <natives>
                 <get-release platform="freebsd" arch="x64" file="libktx.so"/>
@@ -1840,28 +1834,20 @@
             </natives>
         </release-module>
 
-        <!-- LLVM -->
         <release-module name="llvm" native-library="lwjgl_llvm" title="LLVM/Clang" if:true="${binding.llvm}"/>
 
-        <!-- LMDB -->
         <release-module name="lmdb" native-library="lwjgl_lmdb" title="LMDB" if:true="${binding.lmdb}"/>
 
-        <!-- lz4 -->
         <release-module name="lz4" native-library="lwjgl_lz4" title="lz4" if:true="${binding.lz4}"/>
 
-        <!-- meshoptimizer -->
         <release-module name="meshoptimizer" native-library="lwjgl_meshoptimizer" title="meshoptimizer" if:true="${binding.meshoptimizer}"/>
 
-        <!-- mimalloc -->
         <release-module name="mimalloc" native-library="mimalloc" title="mimalloc" if:true="${binding.mimalloc}"/>
 
-        <!-- msdfgen -->
         <release-module name="msdfgen" native-library="lwjgl_msdfgen" title="msdfgen" if:true="${binding.msdfgen}"/>
 
-        <!-- NanoVG -->
         <release-module name="nanovg" native-library="lwjgl_nanovg" title="NanoVG" if:true="${binding.nanovg}"/>
 
-        <!-- Native File Dialog -->
         <release-module name="nfd" native-library="lwjgl_nfd" title="Native File Dialog" if:true="${binding.nfd}">
             <natives>
                 <get-release platform="freebsd" arch="x64" file="liblwjgl_nfd_portal.so"/>
@@ -1874,13 +1860,10 @@
             </natives>
         </release-module>
 
-        <!-- Nuklear -->
         <release-module name="nuklear" native-library="lwjgl_nuklear" title="Nuklear" if:true="${binding.nuklear}"/>
 
-        <!-- ODBC -->
         <release-module name="odbc" title="ODBC" if:true="${binding.odbc}"/>
 
-        <!-- OpenAL -->
         <release-module name="openal" title="OpenAL" if:true="${binding.openal}">
             <natives>
                 <get-release platform="freebsd" arch="x64" file="libopenal.so"/>
@@ -1918,16 +1901,10 @@
             </natives>
         </release-module>
 
-        <!-- OpenCL -->
         <release-module name="opencl" title="OpenCL" if:true="${binding.opencl}"/>
 
-        <!-- OpenGL -->
         <release-module name="opengl" native-library="lwjgl_opengl" title="OpenGL" if:true="${binding.opengl}"/>
 
-        <!-- OpenGL ES -->
-        <release-module name="opengles" native-library="lwjgl_opengles" title="OpenGL ES" if:true="${binding.opengles}"/>
-
-        <!-- OpenXR -->
         <release-module name="openxr" title="OpenXR" if:true="${binding.openxr}">
             <natives>
                 <get-release platform="freebsd" arch="x64" file="libopenxr_loader.so"/>
@@ -1959,13 +1936,10 @@
             </natives>
         </release-module>
 
-        <!-- Opus -->
         <release-module name="opus" native-library="opus" title="Opus" if:true="${binding.opus}"/>
 
-        <!-- Par -->
         <release-module name="par" native-library="lwjgl_par" title="par" if:true="${binding.par}"/>
 
-        <!-- Remotery -->
         <release-module name="remotery" title="remotery" if:true="${binding.remotery}">
             <natives>
                 <get-release platform="freebsd" arch="x64" file="liblwjgl_remotery.so"/>
@@ -1984,37 +1958,26 @@
             </natives>
         </release-module>
 
-        <!-- RenderDoc -->
         <release-module name="renderdoc" title="RenderDoc" if:true="${binding.renderdoc}"/>
 
-        <!-- rpmalloc -->
         <release-module name="rpmalloc" native-library="lwjgl_rpmalloc" title="rpmalloc" if:true="${binding.rpmalloc}"/>
 
-        <!-- SDL -->
         <release-module name="sdl" native-library="SDL3" title="SDL" if:true="${binding.sdl}"/>
 
-        <!-- shaderc -->
         <release-module name="shaderc" native-library="shaderc" title="Shaderc" if:true="${binding.shaderc}"/>
 
-        <!-- spng -->
         <release-module name="spng" native-library="lwjgl_spng" title="spng" if:true="${binding.spng}"/>
 
-        <!-- SPIRV-Cross -->
         <release-module name="spvc" native-library="spirv-cross" title="SPIRV-Cross" if:true="${binding.spvc}"/>
 
-        <!-- stb -->
         <release-module name="stb" native-library="lwjgl_stb" title="stb" if:true="${binding.stb}"/>
 
-        <!-- Tiny OpenEXR -->
         <release-module name="tinyexr" native-library="lwjgl_tinyexr" title="Tiny OpenEXR" if:true="${binding.tinyexr}"/>
 
-        <!-- tiny file dialogs -->
         <release-module name="tinyfd" native-library="lwjgl_tinyfd" title="tiny file dialogs" if:true="${binding.tinyfd}"/>
 
-        <!-- Vulkan Memory Allocator -->
         <release-module name="vma" native-library="lwjgl_vma" title="vma" if:true="${binding.vma}"/>
 
-        <!-- Vulkan -->
         <release-module name="vulkan" title="Vulkan" if:true="${binding.vulkan}">
             <natives>
                 <get-release platform="macos" arch="x64" file="libMoltenVK.dylib"/>
@@ -2024,14 +1987,12 @@
             </natives>
         </release-module>
 
-        <!-- xxHash -->
         <release-module name="xxhash" native-library="lwjgl_xxhash" title="xxHash" if:true="${binding.xxhash}"/>
 
-        <!-- yoga -->
         <release-module name="yoga" native-library="lwjgl_yoga" title="yoga" if:true="${binding.yoga}"/>
 
-        <!-- zstd -->
         <release-module name="zstd" native-library="lwjgl_zstd" title="zstd" if:true="${binding.zstd}"/>
+            -->
 
         </parallel>
     </target>

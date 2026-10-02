@@ -1,0 +1,145 @@
+name: Build Peroxicore
+
+on:
+  workflow_dispatch:
+    inputs:
+      ndk-version:
+        description: 'NDK 版本'
+        required: true
+        default: 'r26b'
+        type: choice
+        options:
+          - r26b
+          - r25c
+          - r23b
+          - r21e
+      build-mode:
+        description: 'mode'
+        required: true
+        default: 'release'
+        type: choice
+        options:
+          - release
+          - debug
+      extra-flags:
+        description: 'options'
+        required: false
+        default: ''
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write
+      packages: write
+      
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+        
+    - name: Setup JDK 8
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '8'
+        java-package: 'jdk'
+        
+    - name: Setup Ant
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ant
+        echo "===== Version ====="
+        java -version
+        javac -version
+        ant -version
+        echo "JAVA_HOME=$JAVA_HOME"
+
+    - name: Build with Ant
+      run: |
+        export JAVA_HOME="${JAVA_HOME:-$(dirname $(dirname $(readlink -f $(which java))))}"
+        export JAVA8_HOME="$JAVA_HOME"
+        echo "JAVA_HOME=$JAVA_HOME"
+        echo "JAVA8_HOME=$JAVA8_HOME"
+        java -version
+        ant release
+
+    - name: Setup Android NDK
+      uses: nttld/setup-ndk@v1
+      id: setup-ndk
+      with:
+        ndk-version: ${{ github.event.inputs.ndk-version }}
+        add-to-path: true
+        local-cache: true
+
+    - name: Cache xmake
+      uses: actions/cache@v4
+      with:
+        path: ~/.xmake
+        key: ${{ runner.os }}-xmake-${{ hashFiles('xmake.lua') }}
+        restore-keys: |
+          ${{ runner.os }}-xmake-
+
+    - name: Setup xmake
+      uses: xmake-io/github-action-setup-xmake@v1
+      with:
+        xmake-version: latest
+        actions-cache-folder: '.xmake-cache'
+
+    - name: Configure and Build
+      env:
+        ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+        NDK: ${{ steps.setup-ndk.outputs.ndk-path }}
+      run: |
+        echo "=========================================="
+        echo "  NDK        : ${{ github.event.inputs.ndk-version }}"
+        echo "  Build Mode : ${{ github.event.inputs.build-mode }}"
+        echo "  NDK Path   : ${{ steps.setup-ndk.outputs.ndk-path }}"
+        echo "=========================================="
+
+        xmake --version
+
+        xmake f -p android \
+          --ndk=${{ steps.setup-ndk.outputs.ndk-path }} \
+          -a arm64-v8a \
+          -m ${{ github.event.inputs.build-mode }} \
+          ${{ github.event.inputs.extra-flags }} \
+          -y
+
+        xmake -y -v
+        
+    - name: Make native.sh executable
+      run: chmod +x native.sh
+
+    - name: Build Native.jar
+      run: bash native.sh
+
+    - name: Deploy
+      run: |
+        mkdir dist \
+        cp ./bin/RELEASE/lwjgl/lwjgl.jar ./dist/ \
+        cp ./lwjgl-natives.jar ./dist/
+
+    - name: Release Android
+      uses: ncipollo/release-action@v1
+      with:
+        tag: android
+        name: Android
+        body: |
+          ## Android
+
+          ### Build Info / 构建信息
+
+          - **Commit / 提交**: [${{ github.sha }}](https://github.com/${{ github.repository }}/commit/${{ github.sha }})
+          - **Branch / 分支**: `${{ github.ref_name }}`
+          - **Built at / 构建时间**: ${{ github.event.repository.updated_at }}1
+
+        allowUpdates: true
+        artifacts: dist/*.jar
+        removeArtifacts: true
+        prerelease: true
+        makeLatest: true
+        token: ${{ secrets.GITHUB_TOKEN }}

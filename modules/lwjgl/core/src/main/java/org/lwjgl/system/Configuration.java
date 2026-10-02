@@ -524,6 +524,8 @@ public class Configuration<T> {
             case FREEBSD:
             case LINUX:
                 return new String[] {"libEGL.so.1"};
+            case ANDROID:
+                return new String[] {"libEGL.so"};
             case MACOSX:
                 return new String[] {"EGL"};
             case WINDOWS:
@@ -689,6 +691,8 @@ public class Configuration<T> {
             case FREEBSD:
             case LINUX:
                 return new String[] {"libGLX.so.0", "libGL.so.1", "libGL.so"};
+            case ANDROID:
+                return new String[] {"libGLESv2.so"};
             case MACOSX:
                 return new String[] {"/System/Library/Frameworks/OpenGL.framework/Versions/Current/OpenGL"};
             case WINDOWS:
@@ -782,6 +786,8 @@ public class Configuration<T> {
             case FREEBSD:
             case LINUX:
                 return new String[] {"libGLESv2.so.2"};
+            case ANDROID:
+                return new String[] {"libGLESv2.so"};
             case MACOSX:
                 return new String[] {"GLESv2"};
             case WINDOWS:

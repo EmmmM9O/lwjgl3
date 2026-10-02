@@ -127,6 +127,7 @@ public final class APIUtil {
             case FREEBSD:
                 return new FreeBSDLibrary(name);
             case LINUX:
+            case ANDROID:
                 return new LinuxLibrary(name);
             case MACOSX:
                 return MacOSXLibrary.create(name);

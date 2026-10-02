@@ -17,4 +17,9 @@
 *.ttf
 *.wav
 *.zip
+libffi-build/
+libffi-3.8.0/
+libffi-3.8.0.tar.gz
 touch.txt
+/build/
+.xmake

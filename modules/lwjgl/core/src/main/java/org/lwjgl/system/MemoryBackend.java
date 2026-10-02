@@ -55,6 +55,10 @@ public interface MemoryBackend {
             backendClasses.add("org.lwjgl.system.MemoryBackendUnsafeLegacy9");
         }
 
+        if (Platform.isAndroid()) {
+            backendClasses.add("org.lwjgl.system.MemoryBackendUnsafeLegacyAndroid");
+        }
+
         backendClasses.add("org.lwjgl.system.MemoryBackendUnsafeLegacy");
 
         if (27 <= javaVersion) {
@@ -81,9 +85,9 @@ public interface MemoryBackend {
         }
 
         for (Throwable t : suppressedExceptions) {
-            t.printStackTrace();
+            t.printStackTrace(APIUtil.DEBUG_STREAM);
             if (t.getCause() != null) {
-                t.getCause().printStackTrace();
+                t.getCause().printStackTrace(APIUtil.DEBUG_STREAM);
             }
         }
 

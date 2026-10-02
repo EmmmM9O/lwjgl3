@@ -189,6 +189,9 @@ public final class ThreadLocalUtil {
 
     // Ensures FUNCTION_MISSING_ABORT will be called even if no context is current,
     public static void setFunctionMissingAddresses(int functionCount) {
+         if (Platform.isAndroid()) {
+            return;
+        }
         long ptr = JNI_NATIVE_INTERFACE + CAPABILITIES_OFFSET;
 
         long currentTable = memGetAddress(ptr);

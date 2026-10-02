@@ -38,6 +38,18 @@ public enum Platform {
             return System.mapLibraryName(name);
         }
     },
+    ANDROID("Android", "android") {
+        private final Pattern SO = Pattern.compile("(?:^|/)lib\\w+[.]so(?:[.]\\d+)*$");
+
+        @Override
+        String mapLibraryName(String name) {
+            if (SO.matcher(name).find()) {
+                return name;
+            }
+
+            return System.mapLibraryName(name);
+        }
+    },
     // TODO: Rename to MACOS in LWJGL 4
     MACOSX("macOS", "macos") {
         private final Pattern DYLIB = Pattern.compile("(?:^|/)lib\\w+(?:[.]\\d+)*[.]dylib$");
@@ -117,24 +129,32 @@ public enum Platform {
     private static final Function<String, String> bundledLibraryPathMapper;
 
     static {
-        String javaVersion = System.getProperty("java.version");
-        Matcher matcher = Pattern
-            .compile("^([1-9][0-9]*)(?:(?:\\.0)*\\.[1-9][0-9]*)*(?:-[a-zA-Z0-9]+)?")
-            .matcher(javaVersion);
+        boolean isAndroid = false;
+        if (System.getProperty("java.runtime.name", "").contains("Android Runtime") || System.getProperty("java.vm.vendor", "").contains("The Android Project") || System.getProperty("java.vendor", "").contains("The Android Project")) {
+            isAndroid = true;
+            JAVA_VERSION = 8;
+        } else {
+            String javaVersion = System.getProperty("java.version");
+            Matcher matcher = Pattern
+                .compile("^([1-9][0-9]*)(?:(?:\\.0)*\\.[1-9][0-9]*)*(?:-[a-zA-Z0-9]+)?")
+                .matcher(javaVersion);
 
-        if (!matcher.find()) {
-            if (javaVersion.startsWith("1.")) {
-                if (!javaVersion.startsWith("1.8.")) {
-                    throw new UnsupportedOperationException("JDK 8 or newer is required.");
+            if (!matcher.find()) {
+                if (javaVersion.startsWith("1.")) {
+                    if (!javaVersion.startsWith("1.8.")) {
+                        throw new UnsupportedOperationException("JDK 8 or newer is required.");
+                    }
                 }
+                throw new IllegalStateException("Failed to parse java.version: " + javaVersion);
             }
-            throw new IllegalStateException("Failed to parse java.version: " + javaVersion);
+
+            JAVA_VERSION = Math.max(8, Integer.parseInt(matcher.group(1)));
         }
 
-        JAVA_VERSION = Math.max(8, Integer.parseInt(matcher.group(1)));
-
         String osName = System.getProperty("os.name");
-        if (osName.startsWith("Windows")) {
+        if (isAndroid) {
+            current = ANDROID;
+        } else if (osName.startsWith("Windows")) {
             current = WINDOWS;
         } else if (osName.startsWith("FreeBSD")) {
             current = FREEBSD;
@@ -175,6 +195,10 @@ public enum Platform {
 
     public static int getJavaVersion() {
         return JAVA_VERSION;
+    }
+
+    public static boolean isAndroid() {
+        return current == ANDROID;
     }
 
     /** Returns the platform on which the library is running. */
