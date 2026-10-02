@@ -110,7 +110,9 @@ jobs:
           ${{ github.event.inputs.extra-flags }} \
           -y
 
-        xmake -y -v
+        if ! xmake -y -v; then
+          find "$GITHUB_WORKSPACE" -name config.log -exec cat {} \;
+        fi
         
     - name: Make native.sh executable
       run: chmod +x native.sh
