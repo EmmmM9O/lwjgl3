@@ -65,6 +65,7 @@ jobs:
         echo "JAVA_HOME=$JAVA_HOME"
         echo "JAVA8_HOME=$JAVA8_HOME"
         java -version
+        ant compile-templates
         ant release
 
     - name: Setup Android NDK
@@ -119,8 +120,8 @@ jobs:
 
     - name: Deploy
       run: |
-        mkdir dist \
-        cp ./bin/RELEASE/lwjgl/lwjgl.jar ./dist/ \
+        mkdir dist 
+        cp ./bin/RELEASE/lwjgl/lwjgl.jar ./dist/ 
         cp ./lwjgl-natives.jar ./dist/
 
     - name: Release Android
