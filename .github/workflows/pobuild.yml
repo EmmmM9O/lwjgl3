@@ -3,16 +3,6 @@ name: Build Peroxicore
 on:
   workflow_dispatch:
     inputs:
-      ndk-version:
-        description: 'NDK 版本'
-        required: true
-        default: 'r26b'
-        type: choice
-        options:
-          - r26b
-          - r25c
-          - r23b
-          - r21e
       build-mode:
         description: 'mode'
         required: true
@@ -68,13 +58,14 @@ jobs:
         ant compile-templates
         ant release
 
-    - name: Setup Android NDK
-      uses: nttld/setup-ndk@v1
-      id: setup-ndk
-      with:
-        ndk-version: ${{ github.event.inputs.ndk-version }}
-        add-to-path: true
-        local-cache: true
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+
+    - name: Install NDK
+      run: |
+        sdkmanager --install "ndk;26.1.10909125"
+        echo "ANDROID_NDK_HOME=$ANDROID_SDK_ROOT/ndk/26.1.10909125" >> $GITHUB_ENV
+        echo "NDK=$ANDROID_SDK_ROOT/ndk/26.1.10909125" >> $GITHUB_ENV
 
     - name: Cache xmake
       uses: actions/cache@v4
@@ -92,19 +83,18 @@ jobs:
 
     - name: Configure and Build
       env:
-        ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
-        NDK: ${{ steps.setup-ndk.outputs.ndk-path }}
+        ANDROID_NDK_HOME: ${{ env.NDK }}
+        NDK: ${{ env.NDK }}
       run: |
         echo "=========================================="
-        echo "  NDK        : ${{ github.event.inputs.ndk-version }}"
         echo "  Build Mode : ${{ github.event.inputs.build-mode }}"
-        echo "  NDK Path   : ${{ steps.setup-ndk.outputs.ndk-path }}"
+        echo "  NDK Path   : ${{ env.NDK }}"
         echo "=========================================="
 
         xmake --version
 
         xmake f -p android \
-          --ndk=${{ steps.setup-ndk.outputs.ndk-path }} \
+          --ndk=${{ env.NDK }} \
           -a arm64-v8a \
           -m ${{ github.event.inputs.build-mode }} \
           ${{ github.event.inputs.extra-flags }} \
