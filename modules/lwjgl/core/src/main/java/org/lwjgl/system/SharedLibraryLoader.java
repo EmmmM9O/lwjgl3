@@ -279,6 +279,7 @@ final class SharedLibraryLoader {
      *
      * @return true if the file is writable
      */
+    @SuppressWarnings("try")
     private static boolean canWrite(Path root, Path file, URL resource, @Nullable Consumer<String> load) {
         Path testFile;
         if (Files.exists(file)) {
@@ -309,7 +310,14 @@ final class SharedLibraryLoader {
                 //
                 // Test for this here and try other paths if it fails.
                 try (FileChannel ignored = extract(file, resource)) {
-                    load.accept(file.toAbsolutePath().toString());
+                    try {
+                        load.accept(file.toAbsolutePath().toString());
+                    } catch (Throwable t) {
+                        if (Configuration.DEBUG_LOADER.get(false)) {
+                            t.printStackTrace(DEBUG_STREAM);
+                        }
+                        throw t;
+                    }
                 }
                 checkedLoad = true;
             }

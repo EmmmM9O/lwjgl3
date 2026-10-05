@@ -37,6 +37,22 @@ JNIEXPORT jlong JNICALL Java_org_lwjgl_system_libc_LibCString_nstrlen(JNIEnv *__
     return (jlong)strlen(str);
 }
 
+JNIEXPORT jint JNICALL Java_org_lwjgl_system_libc_LibCString_nstrlen1(JNIEnv *__env, jclass clazz, jlong address, jint maxLength) {
+    const char *p = (const char *)(uintptr_t)address;
+    UNUSED_PARAMS(__env, clazz)
+    int i = 0;
+    while (i < maxLength && p[i] != 0) i++;
+    return i;
+}
+
+JNIEXPORT jint JNICALL Java_org_lwjgl_system_libc_LibCString_nstrlen2(JNIEnv *__env, jclass clazz, jlong address, jint maxLength) {
+    const uint16_t *p = (const uint16_t *)(uintptr_t)address;
+    UNUSED_PARAMS(__env, clazz)
+    int i = 0;
+    while (i < maxLength && p[i / 2] != 0) i += 2;
+    return i;
+}
+
 JNIEXPORT jlong JNICALL Java_org_lwjgl_system_libc_LibCString_nstrerror(JNIEnv *__env, jclass clazz, jint errnum) {
     UNUSED_PARAMS(__env, clazz)
     return (jlong)(uintptr_t)strerror(errnum);

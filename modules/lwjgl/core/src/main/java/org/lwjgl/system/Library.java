@@ -92,6 +92,15 @@ public final class Library {
                 "\n"
             );
         }
+        if(context != Library.class){
+            if (DEBUG) {
+                DEBUG_STREAM.print(
+                    "[LWJGL] Skip library: " + name +
+                    "\n"
+                );
+            }
+            return;
+        }
 
         // METHOD 1: absolute path
         if (Paths.get(name).isAbsolute()) {

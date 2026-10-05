@@ -26,7 +26,7 @@ final class MultiReleaseTextDecoding {
             return "";
         }
 
-        if (DEBUG) {
+        if (DEBUG || true) {
             // The implementation below does no codepoint validation.
             return jdkFallback(source, length);
         }

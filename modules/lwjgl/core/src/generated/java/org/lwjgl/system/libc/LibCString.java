@@ -350,6 +350,10 @@ public class LibCString {
         return nstrlen(memAddress(str));
     }
 
+    public static native int nstrlen1(long str, int maxLength);
+
+    public static native int nstrlen2(long str, int maxLength);
+
     // --- [ strerror ] ---
 
     /** Unsafe version of: {@link #strerror} */

@@ -445,6 +445,8 @@ public class Configuration<T> {
             case FREEBSD:
             case LINUX:
                 return new String[] {"libEGL.so.1"};
+            case ANDROID:
+                return new String[] {"libEGL.so"};
             case MACOSX:
                 return new String[] {"EGL"};
             case WINDOWS:
@@ -594,6 +596,8 @@ public class Configuration<T> {
     public static String[] OPENGL_LIBRARY_NAME_DEFAULTS() {
         switch (Platform.get()) {
             case FREEBSD:
+            case ANDROID:
+                return new String[] {"libGLESv2.so"};
             case LINUX:
                 return new String[] {"libGLX.so.0", "libGL.so.1", "libGL.so"};
             case MACOSX:
@@ -686,6 +690,8 @@ public class Configuration<T> {
     public static String[] OPENGLES_LIBRARY_NAME_DEFAULTS() {
         switch (Platform.get()) {
             case FREEBSD:
+            case ANDROID:
+                return new String[] {"libGLESv2.so"};
             case LINUX:
                 return new String[] {"libGLESv2.so.2"};
             case MACOSX:

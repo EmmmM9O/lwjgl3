@@ -14,7 +14,7 @@ final class MultiReleaseMemCopy {
     }
 
     static void copy(long src, long dst, long bytes) {
-        if (bytes <= 160) {
+        if (bytes <= 160 && false) {
             // A custom Java loop is fastest at small sizes, approximately up to 160 bytes.
             if (BITS64 && ((src | dst) & 7) == 0) {
                 // both src and dst are aligned to 8 bytes

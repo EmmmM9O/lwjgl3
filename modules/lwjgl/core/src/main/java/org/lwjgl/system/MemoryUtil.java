@@ -81,20 +81,7 @@ public final class MemoryUtil {
     static final Class<? extends FloatBuffer>  BUFFER_FLOAT;
     static final Class<? extends DoubleBuffer> BUFFER_DOUBLE;
 
-    private static final long MARK;
-    private static final long POSITION;
-    private static final long LIMIT;
-    private static final long CAPACITY;
-
     private static final long ADDRESS;
-
-    private static final long PARENT_BYTE;
-    private static final long PARENT_SHORT;
-    private static final long PARENT_CHAR;
-    private static final long PARENT_INT;
-    private static final long PARENT_LONG;
-    private static final long PARENT_FLOAT;
-    private static final long PARENT_DOUBLE;
 
     static {
         Library.initialize();
@@ -112,20 +99,8 @@ public final class MemoryUtil {
         UNSAFE = getUnsafeInstance();
 
         try {
-            MARK = getMarkOffset();
-            POSITION = getPositionOffset();
-            LIMIT = getLimitOffset();
-            CAPACITY = getCapacityOffset();
 
             ADDRESS = getAddressOffset();
-
-            PARENT_BYTE = getFieldOffsetObject(bb.duplicate().order(bb.order()), bb);
-            PARENT_SHORT = getFieldOffsetObject(bb.asShortBuffer(), bb);
-            PARENT_CHAR = getFieldOffsetObject(bb.asCharBuffer(), bb);
-            PARENT_INT = getFieldOffsetObject(bb.asIntBuffer(), bb);
-            PARENT_LONG = getFieldOffsetObject(bb.asLongBuffer(), bb);
-            PARENT_FLOAT = getFieldOffsetObject(bb.asFloatBuffer(), bb);
-            PARENT_DOUBLE = getFieldOffsetObject(bb.asDoubleBuffer(), bb);
         } catch (Throwable t) {
             throw new UnsupportedOperationException(t);
         }
@@ -1254,23 +1229,7 @@ public final class MemoryUtil {
      * @return the duplicated buffer
      */
     public static ByteBuffer memDuplicate(ByteBuffer buffer) {
-        ByteBuffer target;
-        try {
-            target = (ByteBuffer)UNSAFE.allocateInstance(BUFFER_BYTE);
-        } catch (InstantiationException e) {
-            throw new UnsupportedOperationException(e);
-        }
-
-        UNSAFE.putLong(target, ADDRESS, UNSAFE.getLong(buffer, ADDRESS));
-        UNSAFE.putInt(target, MARK, UNSAFE.getInt(buffer, MARK));
-        UNSAFE.putInt(target, POSITION, UNSAFE.getInt(buffer, POSITION));
-        UNSAFE.putInt(target, LIMIT, UNSAFE.getInt(buffer, LIMIT));
-        UNSAFE.putInt(target, CAPACITY, UNSAFE.getInt(buffer, CAPACITY));
-
-        Object attachment = UNSAFE.getObject(buffer, PARENT_BYTE);
-        UNSAFE.putObject(target, PARENT_BYTE, attachment == null ? buffer : attachment);
-
-        return target.order(buffer.order());
+      return buffer.duplicate().order(buffer.order());
     }
 
     /**
@@ -1283,7 +1242,9 @@ public final class MemoryUtil {
      *
      * @return the duplicated buffer
      */
-    public static ShortBuffer memDuplicate(ShortBuffer buffer) { return duplicate(BUFFER_SHORT, buffer, PARENT_SHORT); }
+   public static ShortBuffer memDuplicate(ShortBuffer buffer) {
+      return buffer.duplicate();
+   }
 
     /**
      * Duplicates the specified buffer.
@@ -1295,7 +1256,9 @@ public final class MemoryUtil {
      *
      * @return the duplicated buffer
      */
-    public static CharBuffer memDuplicate(CharBuffer buffer) { return duplicate(BUFFER_CHAR, buffer, PARENT_CHAR); }
+   public static CharBuffer memDuplicate(CharBuffer buffer) {
+      return buffer.duplicate();
+   }
 
     /**
      * Duplicates the specified buffer.
@@ -1307,7 +1270,9 @@ public final class MemoryUtil {
      *
      * @return the duplicated buffer
      */
-    public static IntBuffer memDuplicate(IntBuffer buffer) { return duplicate(BUFFER_INT, buffer, PARENT_INT); }
+   public static IntBuffer memDuplicate(IntBuffer buffer) {
+      return buffer.duplicate();
+   }
 
     /**
      * Duplicates the specified buffer.
@@ -1319,7 +1284,9 @@ public final class MemoryUtil {
      *
      * @return the duplicated buffer
      */
-    public static LongBuffer memDuplicate(LongBuffer buffer) { return duplicate(BUFFER_LONG, buffer, PARENT_LONG); }
+   public static LongBuffer memDuplicate(LongBuffer buffer) {
+      return buffer.duplicate();
+   }
 
     /**
      * Duplicates the specified buffer.
@@ -1331,7 +1298,9 @@ public final class MemoryUtil {
      *
      * @return the duplicated buffer
      */
-    public static FloatBuffer memDuplicate(FloatBuffer buffer) { return duplicate(BUFFER_FLOAT, buffer, PARENT_FLOAT); }
+   public static FloatBuffer memDuplicate(FloatBuffer buffer) {
+      return buffer.duplicate();
+   }
 
     /**
      * Duplicates the specified buffer.
@@ -1343,274 +1312,198 @@ public final class MemoryUtil {
      *
      * @return the duplicated buffer
      */
-    public static DoubleBuffer memDuplicate(DoubleBuffer buffer) { return duplicate(BUFFER_DOUBLE, buffer, PARENT_DOUBLE); }
+   public static DoubleBuffer memDuplicate(DoubleBuffer buffer) {
+      return buffer.duplicate();
+   }
 
     // --- [ Buffer slicing ] ---
+   public static ByteBuffer memSlice(ByteBuffer buffer) {
+      return buffer.slice().order(buffer.order());
+   }
 
-    /**
-     * Slices the specified buffer. The returned buffer will have the same {@link ByteOrder} as the source buffer.
-     *
-     * <p>This method should be preferred over {@link ByteBuffer#slice} because it has a much shorter call chain. Long call chains may fail to inline due to
-     * JVM limits, disabling important optimizations (e.g. scalar replacement via Escape Analysis).</p>
-     *
-     * @param buffer the buffer to slice
-     *
-     * @return the sliced buffer
-     */
-    public static ByteBuffer memSlice(ByteBuffer buffer) {
-        return slice(buffer, memAddress0(buffer) + buffer.position(), buffer.remaining());
-    }
+   public static ShortBuffer memSlice(ShortBuffer buffer) {
+      return buffer.slice();
+   }
 
-    /**
-     * Slices the specified buffer.
-     *
-     * <p>This method should be preferred over {@link ShortBuffer#slice} because it has a much shorter call chain. Long call chains may fail to inline due to
-     * JVM limits, disabling important optimizations (e.g. scalar replacement via Escape Analysis).</p>
-     *
-     * @param buffer the buffer to slice
-     *
-     * @return the sliced buffer
-     */
-    public static ShortBuffer memSlice(ShortBuffer buffer) {
-        return slice(BUFFER_SHORT, buffer, address(buffer.position(), 1, memAddress0(buffer)), buffer.remaining(), PARENT_SHORT);
-    }
+   public static CharBuffer memSlice(CharBuffer buffer) {
+      return buffer.slice();
+   }
 
-    /**
-     * Slices the specified buffer.
-     *
-     * <p>This method should be preferred over {@link CharBuffer#slice} because it has a much shorter call chain. Long call chains may fail to inline due to
-     * JVM limits, disabling important optimizations (e.g. scalar replacement via Escape Analysis).</p>
-     *
-     * @param buffer the buffer to slice
-     *
-     * @return the sliced buffer
-     */
-    public static CharBuffer memSlice(CharBuffer buffer) {
-        return slice(BUFFER_CHAR, buffer, address(buffer.position(), 1, memAddress0(buffer)), buffer.remaining(), PARENT_CHAR);
-    }
+   public static IntBuffer memSlice(IntBuffer buffer) {
+      return buffer.slice();
+   }
 
-    /**
-     * Slices the specified buffer.
-     *
-     * <p>This method should be preferred over {@link IntBuffer#slice} because it has a much shorter call chain. Long call chains may fail to inline due to
-     * JVM limits, disabling important optimizations (e.g. scalar replacement via Escape Analysis).</p>
-     *
-     * @param buffer the buffer to slice
-     *
-     * @return the sliced buffer
-     */
-    public static IntBuffer memSlice(IntBuffer buffer) {
-        return slice(BUFFER_INT, buffer, address(buffer.position(), 2, memAddress0(buffer)), buffer.remaining(), PARENT_INT);
-    }
+   public static LongBuffer memSlice(LongBuffer buffer) {
+      return buffer.slice();
+   }
 
-    /**
-     * Slices the specified buffer.
-     *
-     * <p>This method should be preferred over {@link LongBuffer#slice} because it has a much shorter call chain. Long call chains may fail to inline due to
-     * JVM limits, disabling important optimizations (e.g. scalar replacement via Escape Analysis).</p>
-     *
-     * @param buffer the buffer to slice
-     *
-     * @return the sliced buffer
-     */
-    public static LongBuffer memSlice(LongBuffer buffer) {
-        return slice(BUFFER_LONG, buffer, address(buffer.position(), 3, memAddress0(buffer)), buffer.remaining(), PARENT_LONG);
-    }
+   public static FloatBuffer memSlice(FloatBuffer buffer) {
+      return buffer.slice();
+   }
 
-    /**
-     * Slices the specified buffer.
-     *
-     * <p>This method should be preferred over {@link FloatBuffer#slice} because it has a much shorter call chain. Long call chains may fail to inline due to
-     * JVM limits, disabling important optimizations (e.g. scalar replacement via Escape Analysis).</p>
-     *
-     * @param buffer the buffer to slice
-     *
-     * @return the sliced buffer
-     */
-    public static FloatBuffer memSlice(FloatBuffer buffer) {
-        return slice(BUFFER_FLOAT, buffer, address(buffer.position(), 2, memAddress0(buffer)), buffer.remaining(), PARENT_FLOAT);
-    }
+   public static DoubleBuffer memSlice(DoubleBuffer buffer) {
+      return buffer.slice();
+   }
 
-    /**
-     * Slices the specified buffer.
-     *
-     * <p>This method should be preferred over {@link DoubleBuffer#slice} because it has a much shorter call chain. Long call chains may fail to inline due to
-     * JVM limits, disabling important optimizations (e.g. scalar replacement via Escape Analysis).</p>
-     *
-     * @param buffer the buffer to slice
-     *
-     * @return the sliced buffer
-     */
-    public static DoubleBuffer memSlice(DoubleBuffer buffer) {
-        return slice(BUFFER_DOUBLE, buffer, address(buffer.position(), 3, memAddress0(buffer)), buffer.remaining(), PARENT_DOUBLE);
-    }
-    /**
-     * Returns a slice of the specified buffer between {@code (buffer.position() + offset)} and {@code (buffer.position() + offset + capacity)}. The returned
-     * buffer will have the same {@link ByteOrder} as the original buffer.
-     *
-     * <p>The position and limit of the original buffer are preserved after a call to this method.</p>
-     *
-     * @param buffer   the buffer to slice
-     * @param offset   the slice offset, it must be &le; {@code buffer.remaining()}
-     * @param capacity the slice length, it must be &le; {@code buffer.capacity() - (buffer.position() + offset)}
-     *
-     * @return the sliced buffer
-     */
-    public static ByteBuffer memSlice(ByteBuffer buffer, int offset, int capacity) {
-        int position = buffer.position() + offset;
-        if (offset < 0 || buffer.limit() < position) {
+   public static ByteBuffer memSlice(ByteBuffer buffer, int offset, int capacity) {
+      int originalPosition = buffer.position();
+      int originalLimit = buffer.limit();
+      int position = originalPosition + offset;
+      if (offset >= 0 && originalLimit >= position) {
+         if (capacity >= 0 && buffer.capacity() - position >= capacity) {
+            buffer.position(position);
+            buffer.limit(position + capacity);
+            ByteBuffer sliced = buffer.slice();
+            buffer.position(originalPosition);
+            buffer.limit(originalLimit);
+            return sliced.order(buffer.order());
+         } else {
             throw new IllegalArgumentException();
-        }
-        if (capacity < 0 || buffer.capacity() - position < capacity) {
-            throw new IllegalArgumentException();
-        }
-        return slice(buffer, memAddress0(buffer) + position, capacity);
-    }
+         }
+      } else {
+         throw new IllegalArgumentException();
+      }
+   }
 
-    /**
-     * Returns a slice of the specified buffer between {@code (buffer.position() + offset)} and {@code (buffer.position() + offset + capacity)}.
-     *
-     * <p>The position and limit of the original buffer are preserved after a call to this method.</p>
-     *
-     * @param buffer   the buffer to slice
-     * @param offset   the slice offset, it must be &le; {@code buffer.remaining()}
-     * @param capacity the slice length, it must be &le; {@code buffer.capacity() - (buffer.position() + offset)}
-     *
-     * @return the sliced buffer
-     */
-    public static ShortBuffer memSlice(ShortBuffer buffer, int offset, int capacity) {
-        int position = buffer.position() + offset;
-        if (offset < 0 || buffer.limit() < position) {
+   public static ShortBuffer memSlice(ShortBuffer buffer, int offset, int capacity) {
+      int originalPosition = buffer.position();
+      int originalLimit = buffer.limit();
+      int position = originalPosition + offset;
+      if (offset >= 0 && originalLimit >= position) {
+         if (capacity >= 0 && buffer.capacity() - position >= capacity) {
+            buffer.position(position);
+            buffer.limit(position + capacity);
+            ShortBuffer sliced = buffer.slice();
+            buffer.position(originalPosition);
+            buffer.limit(originalLimit);
+            return sliced;
+         } else {
             throw new IllegalArgumentException();
-        }
-        if (capacity < 0 || buffer.capacity() - position < capacity) {
-            throw new IllegalArgumentException();
-        }
-        return slice(BUFFER_SHORT, buffer, address(position, 1, memAddress0(buffer)), capacity, PARENT_SHORT);
-    }
+         }
+      } else {
+         throw new IllegalArgumentException();
+      }
+   }
 
-    /**
-     * Returns a slice of the specified buffer between {@code (buffer.position() + offset)} and {@code (buffer.position() + offset + capacity)}.
-     *
-     * <p>The position and limit of the original buffer are preserved after a call to this method.</p>
-     *
-     * @param buffer   the buffer to slice
-     * @param offset   the slice offset, it must be &le; {@code buffer.remaining()}
-     * @param capacity the slice length, it must be &le; {@code buffer.capacity() - (buffer.position() + offset)}
-     *
-     * @return the sliced buffer
-     */
-    public static CharBuffer memSlice(CharBuffer buffer, int offset, int capacity) {
-        int position = buffer.position() + offset;
-        if (offset < 0 || buffer.limit() < position) {
+   public static CharBuffer memSlice(CharBuffer buffer, int offset, int capacity) {
+      int originalPosition = buffer.position();
+      int originalLimit = buffer.limit();
+      int position = originalPosition + offset;
+      if (offset >= 0 && originalLimit >= position) {
+         if (capacity >= 0 && buffer.capacity() - position >= capacity) {
+            buffer.position(position);
+            buffer.limit(position + capacity);
+            CharBuffer sliced = buffer.slice();
+            buffer.position(originalPosition);
+            buffer.limit(originalLimit);
+            return sliced;
+         } else {
             throw new IllegalArgumentException();
-        }
-        if (capacity < 0 || buffer.capacity() - position < capacity) {
-            throw new IllegalArgumentException();
-        }
-        return slice(BUFFER_CHAR, buffer, address(position, 1, memAddress0(buffer)), capacity, PARENT_CHAR);
-    }
+         }
+      } else {
+         throw new IllegalArgumentException();
+      }
+   }
 
-    /**
-     * Returns a slice of the specified buffer between {@code (buffer.position() + offset)} and {@code (buffer.position() + offset + capacity)}.
-     *
-     * <p>The position and limit of the original buffer are preserved after a call to this method.</p>
-     *
-     * @param buffer   the buffer to slice
-     * @param offset   the slice offset, it must be &le; {@code buffer.remaining()}
-     * @param capacity the slice length, it must be &le; {@code buffer.capacity() - (buffer.position() + offset)}
-     *
-     * @return the sliced buffer
-     */
-    public static IntBuffer memSlice(IntBuffer buffer, int offset, int capacity) {
-        int position = buffer.position() + offset;
-        if (offset < 0 || buffer.limit() < position) {
+   public static IntBuffer memSlice(IntBuffer buffer, int offset, int capacity) {
+      int originalPosition = buffer.position();
+      int originalLimit = buffer.limit();
+      int position = originalPosition + offset;
+      if (offset >= 0 && originalLimit >= position) {
+         if (capacity >= 0 && buffer.capacity() - position >= capacity) {
+            buffer.position(position);
+            buffer.limit(position + capacity);
+            IntBuffer sliced = buffer.slice();
+            buffer.position(originalPosition);
+            buffer.limit(originalLimit);
+            return sliced;
+         } else {
             throw new IllegalArgumentException();
-        }
-        if (capacity < 0 || buffer.capacity() - position < capacity) {
-            throw new IllegalArgumentException();
-        }
-        return slice(BUFFER_INT, buffer, address(position, 2, memAddress0(buffer)), capacity, PARENT_INT);
-    }
+         }
+      } else {
+         throw new IllegalArgumentException();
+      }
+   }
 
-    /**
-     * Returns a slice of the specified buffer between {@code (buffer.position() + offset)} and {@code (buffer.position() + offset + capacity)}.
-     *
-     * <p>The position and limit of the original buffer are preserved after a call to this method.</p>
-     *
-     * @param buffer   the buffer to slice
-     * @param offset   the slice offset, it must be &le; {@code buffer.remaining()}
-     * @param capacity the slice length, it must be &le; {@code buffer.capacity() - (buffer.position() + offset)}
-     *
-     * @return the sliced buffer
-     */
-    public static LongBuffer memSlice(LongBuffer buffer, int offset, int capacity) {
-        int position = buffer.position() + offset;
-        if (offset < 0 || buffer.limit() < position) {
+   public static LongBuffer memSlice(LongBuffer buffer, int offset, int capacity) {
+      int originalPosition = buffer.position();
+      int originalLimit = buffer.limit();
+      int position = originalPosition + offset;
+      if (offset >= 0 && originalLimit >= position) {
+         if (capacity >= 0 && buffer.capacity() - position >= capacity) {
+            buffer.position(position);
+            buffer.limit(position + capacity);
+            LongBuffer sliced = buffer.slice();
+            buffer.position(originalPosition);
+            buffer.limit(originalLimit);
+            return sliced;
+         } else {
             throw new IllegalArgumentException();
-        }
-        if (capacity < 0 || buffer.capacity() - position < capacity) {
-            throw new IllegalArgumentException();
-        }
-        return slice(BUFFER_LONG, buffer, address(position, 3, memAddress0(buffer)), capacity, PARENT_LONG);
-    }
+         }
+      } else {
+         throw new IllegalArgumentException();
+      }
+   }
 
-    /**
-     * Returns a slice of the specified buffer between {@code (buffer.position() + offset)} and {@code (buffer.position() + offset + capacity)}.
-     *
-     * <p>The position and limit of the original buffer are preserved after a call to this method.</p>
-     *
-     * @param buffer   the buffer to slice
-     * @param offset   the slice offset, it must be &le; {@code buffer.remaining()}
-     * @param capacity the slice length, it must be &le; {@code buffer.capacity() - (buffer.position() + offset)}
-     *
-     * @return the sliced buffer
-     */
-    public static FloatBuffer memSlice(FloatBuffer buffer, int offset, int capacity) {
-        int position = buffer.position() + offset;
-        if (offset < 0 || buffer.limit() < position) {
+   public static FloatBuffer memSlice(FloatBuffer buffer, int offset, int capacity) {
+      int originalPosition = buffer.position();
+      int originalLimit = buffer.limit();
+      int position = originalPosition + offset;
+      if (offset >= 0 && originalLimit >= position) {
+         if (capacity >= 0 && buffer.capacity() - position >= capacity) {
+            buffer.position(position);
+            buffer.limit(position + capacity);
+            FloatBuffer sliced = buffer.slice();
+            buffer.position(originalPosition);
+            buffer.limit(originalLimit);
+            return sliced;
+         } else {
             throw new IllegalArgumentException();
-        }
-        if (capacity < 0 || buffer.capacity() - position < capacity) {
-            throw new IllegalArgumentException();
-        }
-        return slice(BUFFER_FLOAT, buffer, address(position, 2, memAddress0(buffer)), capacity, PARENT_FLOAT);
-    }
+         }
+      } else {
+         throw new IllegalArgumentException();
+      }
+   }
 
-    /**
-     * Returns a slice of the specified buffer between {@code (buffer.position() + offset)} and {@code (buffer.position() + offset + capacity)}.
-     *
-     * <p>The position and limit of the original buffer are preserved after a call to this method.</p>
-     *
-     * @param buffer   the buffer to slice
-     * @param offset   the slice offset, it must be &le; {@code buffer.remaining()}
-     * @param capacity the slice length, it must be &le; {@code buffer.capacity() - (buffer.position() + offset)}
-     *
-     * @return the sliced buffer
-     */
-    public static DoubleBuffer memSlice(DoubleBuffer buffer, int offset, int capacity) {
-        int position = buffer.position() + offset;
-        if (offset < 0 || buffer.limit() < position) {
+   public static DoubleBuffer memSlice(DoubleBuffer buffer, int offset, int capacity) {
+      int originalPosition = buffer.position();
+      int originalLimit = buffer.limit();
+      int position = originalPosition + offset;
+      if (offset >= 0 && originalLimit >= position) {
+         if (capacity >= 0 && buffer.capacity() - position >= capacity) {
+            buffer.position(position);
+            buffer.limit(position + capacity);
+            DoubleBuffer sliced = buffer.slice();
+            buffer.position(originalPosition);
+            buffer.limit(originalLimit);
+            return sliced;
+         } else {
             throw new IllegalArgumentException();
-        }
-        if (capacity < 0 || buffer.capacity() - position < capacity) {
-            throw new IllegalArgumentException();
-        }
-        return slice(BUFFER_DOUBLE, buffer, address(position, 3, memAddress0(buffer)), capacity, PARENT_DOUBLE);
-    }
+         }
+      } else {
+         throw new IllegalArgumentException();
+      }
+   }
 
-    /**
-     * Returns a slice of the specified buffer between {@code (buffer.position() + offset)} and {@code (buffer.position() + offset + capacity)}.
-     *
-     * <p>The position and limit of the original buffer are preserved after a call to this method.</p>
-     *
-     * @param buffer   the buffer to slice
-     * @param offset   the slice offset, it must be &le; {@code buffer.remaining()}
-     * @param capacity the slice length, it must be &le; {@code buffer.capacity() - (buffer.position() + offset)}
-     *
-     * @return the sliced buffer
-     */
-    public static <T extends CustomBuffer<T>> T memSlice(T buffer, int offset, int capacity) { return buffer.slice(offset, capacity); }
+   public static <T extends CustomBuffer<T>> T memSlice(T buffer, int offset, int capacity) {
+      int originalPosition = buffer.position();
+      int originalLimit = buffer.limit();
+      int position = originalPosition + offset;
+      if (offset >= 0 && originalLimit >= position) {
+         if (capacity >= 0 && buffer.capacity() - position >= capacity) {
+            buffer.position(position);
+            buffer.limit(position + capacity);
+            T sliced = buffer.slice();
+            buffer.position(originalPosition);
+            buffer.limit(originalLimit);
+            return sliced;
+         } else {
+            throw new IllegalArgumentException();
+         }
+      } else {
+         throw new IllegalArgumentException();
+      }
+   }
 
     // --- [ memset ] ---
 
@@ -1834,7 +1727,7 @@ public final class MemoryUtil {
          */
 
         //UNSAFE.setMemory(ptr, bytes, (byte)(value & 0xFF));
-        if (bytes < 256L) {
+        if (bytes < 256L && false) {
             int p = (int)ptr;
             if (BITS64) {
                 if ((p & 7) == 0) {
@@ -1923,8 +1816,8 @@ public final class MemoryUtil {
         }
     }
 
-    public static boolean memGetBoolean(long ptr) { return UNSAFE.getByte(null, ptr) != 0; }
-    public static byte memGetByte(long ptr)       { return UNSAFE.getByte(null, ptr); }
+    public static boolean memGetBoolean(long ptr) { return MemoryAccessJNI.getByte(ptr) != 0; }
+    public static byte memGetByte(long ptr)       { return MemoryAccessJNI.getByte(ptr); }
     public static short memGetShort(long ptr)     { return UNSAFE.getShort(null, ptr); }
     public static int memGetInt(long ptr)         { return UNSAFE.getInt(null, ptr); }
     public static long memGetLong(long ptr)       { return UNSAFE.getLong(null, ptr); }
@@ -1987,14 +1880,14 @@ public final class MemoryUtil {
         ------------------------------------- */
 
     private static int write8(long target, int offset, int value) {
-        UNSAFE.putByte(null, target + Integer.toUnsignedLong(offset), (byte)value);
+        MemoryAccessJNI.putByte(target + Integer.toUnsignedLong(offset), (byte)value);
         return offset + 1;
     }
     private static int write8Safe(long target, int offset, int maxLength, int value) {
         if (offset == maxLength) {
             throw new BufferOverflowException();
         }
-        UNSAFE.putByte(null, target + Integer.toUnsignedLong(offset), (byte)value);
+        MemoryAccessJNI.putByte(target + Integer.toUnsignedLong(offset), (byte)value);
         return offset + 1;
     }
     private static int write16(long target, int offset, char value) {
@@ -2452,6 +2345,7 @@ public final class MemoryUtil {
     }
 
     private static int strlen64NT1(long address, int maxLength) {
+        if(true) return nstrlen1(address, maxLength);
         int i = 0;
 
         if (8 <= maxLength) {
@@ -2539,6 +2433,7 @@ public final class MemoryUtil {
     }
 
     private static int strlen64NT2(long address, int maxLength) {
+        if(true) return nstrlen2(address, maxLength);
         int i = 0;
 
         if (8 <= maxLength) {
@@ -3031,200 +2926,37 @@ public final class MemoryUtil {
         return getFieldOffset(bb.getClass(), long.class, offset -> UNSAFE.getLong(bb, offset) == MAGIC_ADDRESS);
     }
 
-    private static final int MAGIC_CAPACITY = 0x0D15EA5E;
-    private static final int MAGIC_POSITION = 0x00FACADE;
+   static ByteBuffer wrapBufferByte(long address, int capacity) {
+      return NewDirectByteBuffer(address, capacity);
+   }
 
-    private static long getMarkOffset() {
-        ByteBuffer bb = Objects.requireNonNull(NewDirectByteBuffer(1L, 0));
-        return getFieldOffsetInt(bb, -1);
-    }
+   static ShortBuffer wrapBufferShort(long address, int capacity) {
+      ByteBuffer bb = NewDirectByteBuffer(address, capacity * 2);
+      return bb.order(NATIVE_ORDER).asShortBuffer();
+   }
 
-    private static long getPositionOffset() {
-        ByteBuffer bb = Objects.requireNonNull(NewDirectByteBuffer(-1L, MAGIC_CAPACITY));
-        bb.position(MAGIC_POSITION);
-        return getFieldOffsetInt(bb, MAGIC_POSITION);
-    }
+   static CharBuffer wrapBufferChar(long address, int capacity) {
+      ByteBuffer bb = NewDirectByteBuffer(address, capacity * 2);
+      return bb.order(NATIVE_ORDER).asCharBuffer();
+   }
 
-    private static long getLimitOffset() {
-        ByteBuffer bb = Objects.requireNonNull(NewDirectByteBuffer(-1L, MAGIC_CAPACITY));
-        bb.limit(MAGIC_POSITION);
-        return getFieldOffsetInt(bb, MAGIC_POSITION);
-    }
+   static IntBuffer wrapBufferInt(long address, int capacity) {
+      ByteBuffer bb = NewDirectByteBuffer(address, capacity * 4);
+      return bb.order(NATIVE_ORDER).asIntBuffer();
+   }
 
-    private static long getCapacityOffset() {
-        ByteBuffer bb = Objects.requireNonNull(NewDirectByteBuffer(-1L, MAGIC_CAPACITY));
-        bb.limit(0);
-        return getFieldOffsetInt(bb, MAGIC_CAPACITY);
-    }
+   static LongBuffer wrapBufferLong(long address, int capacity) {
+      ByteBuffer bb = NewDirectByteBuffer(address, capacity * 8);
+      return bb.order(NATIVE_ORDER).asLongBuffer();
+   }
 
-    static ByteBuffer wrapBufferByte(long address, int capacity) {
-        ByteBuffer buffer;
-        try {
-            buffer = (ByteBuffer)UNSAFE.allocateInstance(BUFFER_BYTE);
-        } catch (InstantiationException e) {
-            throw new UnsupportedOperationException(e);
-        }
+   static FloatBuffer wrapBufferFloat(long address, int capacity) {
+      ByteBuffer bb = NewDirectByteBuffer(address, capacity * 4);
+      return bb.order(NATIVE_ORDER).asFloatBuffer();
+   }
 
-        UNSAFE.putLong(buffer, ADDRESS, address);
-        UNSAFE.putInt(buffer, MARK, -1);
-        UNSAFE.putInt(buffer, LIMIT, capacity);
-        UNSAFE.putInt(buffer, CAPACITY, capacity);
-
-        return buffer.order(NATIVE_ORDER);
-    }
-
-    static ShortBuffer wrapBufferShort(long address, int capacity) {
-        ShortBuffer buffer;
-        try {
-            buffer = (ShortBuffer)UNSAFE.allocateInstance(BUFFER_SHORT);
-        } catch (InstantiationException e) {
-            throw new UnsupportedOperationException(e);
-        }
-
-        UNSAFE.putLong(buffer, ADDRESS, address);
-        UNSAFE.putInt(buffer, MARK, -1);
-        UNSAFE.putInt(buffer, LIMIT, capacity);
-        UNSAFE.putInt(buffer, CAPACITY, capacity);
-
-        return buffer;
-    }
-
-    static CharBuffer wrapBufferChar(long address, int capacity) {
-        CharBuffer buffer;
-        try {
-            buffer = (CharBuffer)UNSAFE.allocateInstance(BUFFER_CHAR);
-        } catch (InstantiationException e) {
-            throw new UnsupportedOperationException(e);
-        }
-
-        UNSAFE.putLong(buffer, ADDRESS, address);
-        UNSAFE.putInt(buffer, MARK, -1);
-        UNSAFE.putInt(buffer, LIMIT, capacity);
-        UNSAFE.putInt(buffer, CAPACITY, capacity);
-
-        return buffer;
-    }
-
-    static IntBuffer wrapBufferInt(long address, int capacity) {
-        IntBuffer buffer;
-        try {
-            buffer = (IntBuffer)UNSAFE.allocateInstance(BUFFER_INT);
-        } catch (InstantiationException e) {
-            throw new UnsupportedOperationException(e);
-        }
-
-        UNSAFE.putLong(buffer, ADDRESS, address);
-        UNSAFE.putInt(buffer, MARK, -1);
-        UNSAFE.putInt(buffer, LIMIT, capacity);
-        UNSAFE.putInt(buffer, CAPACITY, capacity);
-
-        return buffer;
-    }
-
-    static LongBuffer wrapBufferLong(long address, int capacity) {
-        LongBuffer buffer;
-        try {
-            buffer = (LongBuffer)UNSAFE.allocateInstance(BUFFER_LONG);
-        } catch (InstantiationException e) {
-            throw new UnsupportedOperationException(e);
-        }
-
-        UNSAFE.putLong(buffer, ADDRESS, address);
-        UNSAFE.putInt(buffer, MARK, -1);
-        UNSAFE.putInt(buffer, LIMIT, capacity);
-        UNSAFE.putInt(buffer, CAPACITY, capacity);
-
-        return buffer;
-    }
-
-    static FloatBuffer wrapBufferFloat(long address, int capacity) {
-        FloatBuffer buffer;
-        try {
-            buffer = (FloatBuffer)UNSAFE.allocateInstance(BUFFER_FLOAT);
-        } catch (InstantiationException e) {
-            throw new UnsupportedOperationException(e);
-        }
-
-        UNSAFE.putLong(buffer, ADDRESS, address);
-        UNSAFE.putInt(buffer, MARK, -1);
-        UNSAFE.putInt(buffer, LIMIT, capacity);
-        UNSAFE.putInt(buffer, CAPACITY, capacity);
-
-        return buffer;
-    }
-
-    static DoubleBuffer wrapBufferDouble(long address, int capacity) {
-        DoubleBuffer buffer;
-        try {
-            buffer = (DoubleBuffer)UNSAFE.allocateInstance(BUFFER_DOUBLE);
-        } catch (InstantiationException e) {
-            throw new UnsupportedOperationException(e);
-        }
-
-        UNSAFE.putLong(buffer, ADDRESS, address);
-        UNSAFE.putInt(buffer, MARK, -1);
-        UNSAFE.putInt(buffer, LIMIT, capacity);
-        UNSAFE.putInt(buffer, CAPACITY, capacity);
-
-        return buffer;
-    }
-
-    static ByteBuffer slice(ByteBuffer source, long address, int capacity) {
-        ByteBuffer target;
-        try {
-            target = (ByteBuffer)UNSAFE.allocateInstance(BUFFER_BYTE);
-        } catch (InstantiationException e) {
-            throw new UnsupportedOperationException(e);
-        }
-
-        UNSAFE.putLong(target, ADDRESS, address);
-        UNSAFE.putInt(target, MARK, -1);
-        UNSAFE.putInt(target, LIMIT, capacity);
-        UNSAFE.putInt(target, CAPACITY, capacity);
-
-        Object attachment = UNSAFE.getObject(source, PARENT_BYTE);
-        UNSAFE.putObject(target, PARENT_BYTE, attachment == null ? source : attachment);
-
-        return target.order(source.order());
-    }
-
-    @SuppressWarnings("unchecked")
-    static <T extends Buffer> T slice(Class<? extends T> clazz, T source, long address, int capacity, long attachmentOffset) {
-        T target;
-        try {
-            target = (T)UNSAFE.allocateInstance(clazz);
-        } catch (InstantiationException e) {
-            throw new UnsupportedOperationException(e);
-        }
-
-        UNSAFE.putLong(target, ADDRESS, address);
-        UNSAFE.putInt(target, MARK, -1);
-        UNSAFE.putInt(target, LIMIT, capacity);
-        UNSAFE.putInt(target, CAPACITY, capacity);
-
-        UNSAFE.putObject(target, attachmentOffset, UNSAFE.getObject(source, attachmentOffset));
-
-        return target;
-    }
-
-    @SuppressWarnings("unchecked")
-    static <T extends Buffer> T duplicate(Class<? extends T> clazz, T source, long attachmentOffset) {
-        T target;
-        try {
-            target = (T)UNSAFE.allocateInstance(clazz);
-        } catch (InstantiationException e) {
-            throw new UnsupportedOperationException(e);
-        }
-
-        UNSAFE.putLong(target, ADDRESS, UNSAFE.getLong(source, ADDRESS));
-        UNSAFE.putInt(target, MARK, UNSAFE.getInt(source, MARK));
-        UNSAFE.putInt(target, POSITION, UNSAFE.getInt(source, POSITION));
-        UNSAFE.putInt(target, LIMIT, UNSAFE.getInt(source, LIMIT));
-        UNSAFE.putInt(target, CAPACITY, UNSAFE.getInt(source, CAPACITY));
-
-        UNSAFE.putObject(target, attachmentOffset, UNSAFE.getObject(source, attachmentOffset));
-
-        return target;
-    }
-
+   static DoubleBuffer wrapBufferDouble(long address, int capacity) {
+      ByteBuffer bb = NewDirectByteBuffer(address, capacity * 8);
+      return bb.order(NATIVE_ORDER).asDoubleBuffer();
+   }
 }
