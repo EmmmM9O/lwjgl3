@@ -92,7 +92,7 @@ public final class Library {
                 "\n"
             );
         }
-        if(context != Library.class){
+        if(context != Library.class && !module.startsWith("peroxicore")){
             if (DEBUG) {
                 DEBUG_STREAM.print(
                     "[LWJGL] Skip library: " + name +

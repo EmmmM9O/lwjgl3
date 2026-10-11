@@ -1,5 +1,5 @@
 set_project("lwjgl")
-set_languages("c11")
+set_languages("c11", "c++20")
 
 local NDK = get_config("ndk")
 
@@ -51,6 +51,37 @@ do
 
 	add_includedirs(
 		path.join(LWJGL, "stb/src/main/c")
+	)
+
+	add_files(path.join(LWJGL, "tinyexr/src/generated/c/*.cpp"))
+	add_files(path.join(LWJGL, "tinyexr/src/generated/c/*.c"))
+	add_files(path.join(LWJGL, "tinyexr/src/main/c/*.c"))
+	add_files(path.join(LWJGL, "tinyexr/src/main/c/*.cc"))
+
+	add_includedirs(
+		path.join(LWJGL, "tinyexr/src/main/c")
+	)
+
+	add_files(path.join(LWJGL, "lz4/src/generated/c/*.c"))
+	add_files(path.join(LWJGL, "lz4/src/main/c/*.c"))
+
+	add_includedirs(
+		path.join(LWJGL, "lz4/src/main/c")
+	)
+
+	add_files(path.join(LWJGL, "xxhash/src/generated/c/*.c"))
+	add_files(path.join(LWJGL, "xxhash/src/main/c/*.c"))
+	remove_files(path.join(LWJGL, "xxhash/src/main/c/xxh_x86dispatch.c"))
+
+	add_includedirs(
+		path.join(LWJGL, "xxhash/src/main/c")
+	)
+
+	add_files(path.join(LWJGL, "meshoptimizer/src/generated/c/*.cpp"))
+	add_files(path.join(LWJGL, "meshoptimizer/src/main/c/*.cpp"))
+
+	add_includedirs(
+		path.join(LWJGL, "meshoptimizer/src/main/c")
 	)
 
 	set_targetdir("$(builddir)/android/arm64/org/lwjgl")

@@ -7,6 +7,7 @@ package org.lwjgl.system;
 
 import org.jspecify.annotations.*;
 
+import static org.lwjgl.system.MemoryUtil.*;
 /**
  * This class contains native methods that can be used to call dynamically loaded functions. It is used internally by the LWJGL bindings, but can also
  * be used to call other dynamically loaded functions. Not all possible signatures are available, only those needed by the LWJGL bindings. To call a
@@ -34,9 +35,29 @@ public final class JNI {
 
     static {
         Library.initialize();
+
+        MemoryAllocator allocator = getAllocator(Configuration.DEBUG_MEMORY_ALLOCATOR_INTERNAL.get(true));
+        setupMalloc(
+            allocator.getMalloc(),
+            allocator.getCalloc(),
+            allocator.getRealloc(),
+            allocator.getFree(),
+            allocator.getAlignedAlloc(),
+            allocator.getAlignedFree()
+        );
     }
 
     private JNI() {}
+
+
+    public static native void setupMalloc(
+        long malloc,
+        long calloc,
+        long realloc,
+        long free,
+        long aligned_alloc,
+        long aligned_free
+    );
 
     // Pointer API
 

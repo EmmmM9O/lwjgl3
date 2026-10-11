@@ -4,12 +4,42 @@
  * MACHINE GENERATED FILE, DO NOT EDIT
  */
 #include "common_tools.h"
+#include "lwjgl_malloc.h"
 
 #ifdef LWJGL_WINDOWS
     #define APIENTRY __stdcall
 #else
     #define APIENTRY
 #endif
+
+mallocPROC        org_lwjgl_malloc;
+callocPROC        org_lwjgl_calloc;
+reallocPROC       org_lwjgl_realloc;
+freePROC          org_lwjgl_free;
+
+aligned_allocPROC org_lwjgl_aligned_alloc;
+aligned_freePROC  org_lwjgl_aligned_free;
+
+EXTERN_C_ENTER
+JNIEXPORT void JNICALL Java_org_lwjgl_system_JNI_setupMalloc(
+    JNIEnv *env, jclass clazz, 
+    jlong malloc, 
+    jlong calloc, 
+    jlong realloc, 
+    jlong free, 
+    jlong aligned_alloc, 
+    jlong aligned_free 
+) { 
+    UNUSED_PARAMS(env, clazz) 
+ 
+  org_lwjgl_malloc = (mallocPROC)(uintptr_t)malloc;
+  org_lwjgl_calloc = (callocPROC)(uintptr_t)calloc;
+  org_lwjgl_realloc = (reallocPROC)(uintptr_t)realloc;
+  org_lwjgl_free = (freePROC)(uintptr_t)free;
+  org_lwjgl_aligned_alloc = (aligned_allocPROC)(uintptr_t)aligned_alloc;
+  org_lwjgl_aligned_free = (aligned_freePROC)(uintptr_t)aligned_free;
+}
+
 
 JNIEXPORT jbyte JNICALL Java_org_lwjgl_system_JNI_invokePB__JJ(JNIEnv *__env, jclass clazz, jlong param0, jlong __functionAddress) {
     UNUSED_PARAMS(__env, clazz)
